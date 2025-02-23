@@ -156,7 +156,7 @@ exit_cmd db 'exit', 0
 help_msg db 'Available commands: help, info, exit', 0
 welcome_msg db 'Welcome back to computer, master!', 0
 
-info_msg_0 db 'SimplifiedOS v0.1.0', 0
+info_msg_0 db 'Simplified OS v0.1.0', 0
 info_msg_1 db 'This OS is just for learning', 0
 
 cmd_buf times 20 db 0
