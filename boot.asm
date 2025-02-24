@@ -47,11 +47,11 @@ backspace:
     dec bx
     mov ah, 0x0E
     mov al, 0x08
-    int 0x10       ; カーソルを戻す
+    int 0x10        ; カーソルを戻す
     mov al, ' '
-    int 0x10       ; 空白を上書き
+    int 0x10        ; 空白を上書き
     mov al, 0x08
-    int 0x10       ; カーソルを再び戻す
+    int 0x10        ; カーソルを再び戻す
     jmp main_loop
 
 get_key:
@@ -169,6 +169,7 @@ welcome_msg db 'Welcome back to your computer, master!', 0
 info_msg_0 db 'Simplified OS v0.1.0', 0
 info_msg_1 db 'This OS is just for my learning', 0
 
+; コマンド入力受け付け領域
 cmd_buf times 20 db 0
 
 times 510-($-$$) db 0
