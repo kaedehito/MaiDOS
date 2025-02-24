@@ -1,4 +1,4 @@
 # Simplified OS
 
-<img width="721" alt="image" src="https://github.com/user-attachments/assets/1b04e0c2-d53d-4f8c-931e-c824b9a5540b" />
+![image](https://github.com/user-attachments/assets/4c7ccd5a-40f1-41cc-bd1a-8ba65cfae592)
 
