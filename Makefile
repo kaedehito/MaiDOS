@@ -1,8 +1,8 @@
-qemu: os.img
-	qemu-system-x86_64 -drive format=raw,file=os.img
+qemu: os.bin
+	qemu-system-x86_64 -drive format=raw,file=os.bin
 
-os.img: boot.bin kernel.bin
-	cat boot.bin kernel.bin > os.img
+os.bin: boot.bin kernel.bin
+	cat boot.bin kernel.bin > os.bin
 
 boot.bin: boot.asm
 	nasm -f bin boot.asm -o boot.bin
