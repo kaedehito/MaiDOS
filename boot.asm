@@ -202,7 +202,7 @@ print_bcd:
     ret
 
 
-prompt db 'Shell> ', 0
+prompt db '[sh]> ', 0
 newline db 0x0D, 0x0A, 0
 
 help_cmd db 'help', 0
@@ -211,11 +211,11 @@ clear_cmd db 'clear', 0
 now_cmd db 'now', 0
 exit_cmd db 'exit', 0
 
-help_msg db 'Available commands: help, info, clear, exit', 0
-welcome_msg db 'Welcome back to your computer, master!', 0
+welcome_msg db 'Welcome back to computer, master!', 0
+help_msg db 'Commands: help, info, clear, now, exit', 0
 
 info_msg_0 db 'Simplified OS v0.1.0', 0
-info_msg_1 db 'This OS is just for my learning', 0
+info_msg_1 db '(c) 2024 Kajizuka Taichi', 0
 
 ; コマンド入力受け付け領域
 cmd_buf times 20 db 0
