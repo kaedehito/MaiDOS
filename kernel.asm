@@ -96,11 +96,11 @@ compare_cmd:
     cmp ax, 1           ; ならば実行する
     je clear_screen
 
-    mov si, cmd_buf     ; 1加算
-    mov di, shcmd_inc
-    call str_cmp        ; 入力とコマンド名"inc"が同じか比較
+    mov si, cmd_buf     ; ２倍
+    mov di, shcmd_dup
+    call str_cmp        ; 入力とコマンド名"dup"が同じか比較
     cmp ax, 1           ; ならば実行する
-    je inc_arg
+    je dup_arg
 
     mov si, cmd_buf     ; 終了
     mov di, shcmd_exit
@@ -123,11 +123,12 @@ clear_screen:
     int 0x10        ; BIOS コール
     ret
 
-inc_arg:
+dup_arg:
     mov ax, [cmd_buf + bx + 1]
     sub ax, '0'
     add ax, ax
-    call print_bcd
+    add ax, '0'
+    call print_char
     ret
 
 halt_system:        ; システム終了
@@ -162,7 +163,7 @@ newline db 0x0D, 0x0A, 0
 
 shcmd_help db 'help', 0
 shcmd_clear db 'clear', 0
-shcmd_inc db 'inc', 0
+shcmd_dup db 'dup', 0
 shcmd_exit db 'exit', 0
 
 welcome_msg db 'Welcome back to computer, master!', 0
