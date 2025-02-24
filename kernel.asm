@@ -1,10 +1,10 @@
 welcome:
-    call clear_screen
+    call clear_screen   ; BIOSの画面をクリア
 
-    mov si, welcome_msg
+    mov si, welcome_msg ; 歓迎メッセージ
     call println_str
 
-    mov si, newline
+    mov si, newline     ; 改行
     call print_str
 
 start:
@@ -27,8 +27,9 @@ main_loop:
 
     call print_char         ; 入力文字を画面に表示
     mov [cmd_buf + bx], al  ; 入力をバッファに保存
-    inc bx
-    jmp main_loop
+    inc bx                  ; バッファを指すbxを進める
+
+    jmp main_loop           ; ループ継続
 
 execute_cmd:
     mov byte [cmd_buf + bx], 0  ; 文字列終端を追加
@@ -58,35 +59,35 @@ backspace:
     jmp main_loop
 
 get_key:
-    mov ah, 0x00
-    int 0x16
+    mov ah, 0x00    ; 入力
+    int 0x16        ; BIOS コール
     ret
 
 print_char:
-    mov ah, 0x0E
-    int 0x10
+    mov ah, 0x0E    ; 出力
+    int 0x10        ; BIOS コール
     ret
 
 print_str:
-    lodsb
-    or al, al
-    jz done
+    lodsb           ; 文字をロード
+    or al, al       ; Null文字か
+    jz done         ; ならば終了
     call print_char
-    jmp print_str
+    jmp print_str   ; 次の文字へ
 done:
     ret
 
 println_str:
     call print_str
-    mov si, newline
+    mov si, newline ; 改行を出力
     call print_str
     ret
 
 compare_cmd:
     mov si, cmd_buf     ; ヘルプ
     mov di, help_cmd
-    call str_cmp
-    cmp ax, 1
+    call str_cmp        ; 入力とコマンド名が同じか比較
+    cmp ax, 1           ; ならば実行する
     je print_help
 
     mov si, cmd_buf     ; 情報
@@ -116,12 +117,12 @@ compare_cmd:
     ret
 
 print_help:
-    mov si, help_msg
+    mov si, help_msg    ; ヘルプを表示
     call println_str
     ret
 
 print_info:
-    mov si, info_msg
+    mov si, info_msg    ; 情報を表示
     call println_str
     ret
 
@@ -130,7 +131,7 @@ clear_screen:
     mov ds, ax
     mov ah, 0x0
     mov al, 0x3
-    int 0x10
+    int 0x10        ; BIOS コール
     ret
 
 show_now:
