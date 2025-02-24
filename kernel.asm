@@ -85,31 +85,25 @@ println_str:
 
 compare_cmd:
     mov si, cmd_buf     ; ヘルプ
-    mov di, help_cmd
+    mov di, shcmd_help
     call str_cmp        ; 入力とコマンド名"help"が同じか比較
     cmp ax, 1           ; ならば実行する
     je print_help
 
-    mov si, cmd_buf     ; 情報
-    mov di, info_cmd
-    call str_cmp        ; 入力とコマンド名"info"が同じか比較
-    cmp ax, 1
-    je print_info
-
     mov si, cmd_buf     ; 画面クリア
-    mov di, clear_cmd
+    mov di, shcmd_clear
     call str_cmp        ; 入力とコマンド名"clear"が同じか比較
     cmp ax, 1           ; ならば実行する
     je clear_screen
 
-    mov si, cmd_buf     ; 今の時刻
-    mov di, now_cmd
-    call str_cmp        ; 入力とコマンド名"now"が同じか比較
+    mov si, cmd_buf     ; 1加算
+    mov di, shcmd_inc
+    call str_cmp        ; 入力とコマンド名"inc"が同じか比較
     cmp ax, 1           ; ならば実行する
-    je show_now
+    je inc_arg
 
     mov si, cmd_buf     ; 終了
-    mov di, exit_cmd
+    mov di, shcmd_exit
     call str_cmp        ; 入力とコマンド名"exit"が同じか比較
     cmp ax, 1           ; ならば実行する
     je halt_system
@@ -121,11 +115,6 @@ print_help:
     call println_str
     ret
 
-print_info:
-    mov si, info_msg    ; 情報を表示
-    call println_str
-    ret
-
 clear_screen:
     mov ax, 0x07c0  ; 画面をクリア
     mov ds, ax
@@ -134,28 +123,11 @@ clear_screen:
     int 0x10        ; BIOS コール
     ret
 
-show_now:           ; 現在時刻を表示
-    mov ah, 0x02    ; RTC (Real-Time Clock) から時刻を取得
-    int 0x1A        ; BIOS コール
-
-    mov al, ch      ;  時（CH）の変換と表示
+inc_arg:
+    mov ax, [cmd_buf + bx + 1]
+    sub ax, '0'
+    add ax, ax
     call print_bcd
-
-    mov al, ':'     ; コロン記号
-    call print_char
-
-    mov al, cl      ; 分（CL）の変換と表示
-    call print_bcd
-
-    mov al, ':'     ; コロン記号
-    call print_char
-
-    mov al, dh      ;  秒（DH）の変換と表示
-    call print_bcd
-
-    mov si, newline ; 改行
-    call print_str
-
     ret
 
 halt_system:        ; システム終了
@@ -168,12 +140,16 @@ loop_cmp:
     mov al, [si]    ; SI: 入力文字列, DI: 比較対象
     mov ah, [di]
     cmp al, ah
-    jne no_match
+    jne no_match    ; 違えば終了
+
+    cmp a, ' '
+    je match        ; スペースでも終了
     test al, al
-    jz match        ; 両方の文字列が `0x00` に到達したら一致
+    jz match        ; 両方の文字列が Null文字に到達したら一致
+
     inc si
     inc di
-    loop loop_cmp   ; 比較ループ継続
+    jmp loop_cmp   ; 比較ループ継続
 match:
     mov ax, 1
     ret
@@ -183,35 +159,34 @@ no_match:
 
 print_bcd:
     push ax
-    mov ah, 0x0E  ; BIOS 文字表示(INT 0x10)
 
     ; 上位4ビット (10の位) を取得して ASCII に変換
     mov dl, al
     shr dl, 4     ; 上位4ビット (10の位)
     add dl, '0'   ; ASCII 変換
     mov al, dl
-    int 0x10      ; 画面に表示
+    call print_char
 
     ; 下位4ビット (1の位) を取得して ASCII に変換
     pop ax
     and al, 0x0F  ; 下位4ビット (1の位)
     add al, '0'   ; ASCII 変換
-    int 0x10      ; 画面に表示
-    ret
+    call print_char
 
+    ret
 
 prompt db '[sh]> ', 0
 newline db 0x0D, 0x0A, 0
 
-help_cmd db 'help', 0
-info_cmd db 'info', 0
-clear_cmd db 'clear', 0
-now_cmd db 'now', 0
-exit_cmd db 'exit', 0
+shcmd_help db 'help', 0
+shcmd_clear db 'clear', 0
+shcmd_inc db 'inc', 0
+shcmd_exit db 'exit', 0
 
 welcome_msg db 'Welcome back to computer, master!', 0
-help_msg db 'Commands: help, info, clear, now, exit', 0
-info_msg db 'Simplified OS v0.1.0', 0x0D, 0x0A, '(c) 2024 Kajizuka Taichi', 0
+help_msg db 'Simplified OS v0.1.0', 0x0D, 0x0A, \
+    '(c) 2024 Kajizuka Taichi', 0x0D, 0x0A, \
+    'Commands: help, info, clear, now, exit', 0
 
 ; コマンド入力受け付け領域
 cmd_buf times 20 db 0
