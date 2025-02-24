@@ -169,7 +169,7 @@ shcmd_exit db 'exit', 0
 welcome_msg db 'Welcome back to computer, master!', 0
 help_msg db 'Simplified OS v0.1.0', 0x0D, 0x0A, \
     '(c) 2024 Kajizuka Taichi', 0x0D, 0x0A, \
-    'Commands: help, info, clear, now, exit', 0
+    'Commands: help, dup, clear, exit', 0
 
 ; コマンド入力受け付け領域
 cmd_buf times 20 db 0
