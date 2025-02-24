@@ -142,10 +142,10 @@ loop_cmp:
     cmp al, ah
     jne no_match    ; 違えば終了
 
-    cmp a, ' '
-    je match        ; スペースでも終了
     test al, al
     jz match        ; 両方の文字列が Null文字に到達したら一致
+    cmp al, ' '
+    je match        ; スペースでも終了
 
     inc si
     inc di
@@ -155,24 +155,6 @@ match:
     ret
 no_match:
     xor ax, ax
-    ret
-
-print_bcd:
-    push ax
-
-    ; 上位4ビット (10の位) を取得して ASCII に変換
-    mov dl, al
-    shr dl, 4     ; 上位4ビット (10の位)
-    add dl, '0'   ; ASCII 変換
-    mov al, dl
-    call print_char
-
-    ; 下位4ビット (1の位) を取得して ASCII に変換
-    pop ax
-    and al, 0x0F  ; 下位4ビット (1の位)
-    add al, '0'   ; ASCII 変換
-    call print_char
-
     ret
 
 prompt db '[sh]> ', 0
