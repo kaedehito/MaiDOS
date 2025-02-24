@@ -1,6 +1,3 @@
-org 0x7E00
-bits 16
-
 welcome:
     call clear_screen
 
@@ -221,3 +218,5 @@ info_msg db 'Simplified OS v0.1.0', 0x0D, 0x0A, '(c) 2024 Kajizuka Taichi', 0
 cmd_buf times 20 db 0
 
 times 510-($-$$) db 0
+db 0x55
+db 0xAA
