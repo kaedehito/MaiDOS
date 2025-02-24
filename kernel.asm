@@ -1,3 +1,6 @@
+org 0x7E00
+bits 16
+
 welcome:
     call clear_screen
 
