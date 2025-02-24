@@ -83,31 +83,31 @@ println_str:
     ret
 
 compare_cmd:
-    mov si, cmd_buf
+    mov si, cmd_buf     ; ヘルプ
     mov di, help_cmd
     call str_cmp
     cmp ax, 1
     je print_help
 
-    mov si, cmd_buf
+    mov si, cmd_buf     ; 情報
     mov di, info_cmd
     call str_cmp
     cmp ax, 1
     je print_info
 
-    mov si, cmd_buf
+    mov si, cmd_buf     ; 画面クリア
     mov di, clear_cmd
     call str_cmp
     cmp ax, 1
     je clear_screen
 
-    mov si, cmd_buf
+    mov si, cmd_buf     ; 今の時刻
     mov di, now_cmd
     call str_cmp
     cmp ax, 1
     je show_now
 
-    mov si, cmd_buf
+    mov si, cmd_buf     ; 終了
     mov di, exit_cmd
     call str_cmp
     cmp ax, 1
@@ -121,9 +121,7 @@ print_help:
     ret
 
 print_info:
-    mov si, info_msg_0
-    call println_str
-    mov si, info_msg_1
+    mov si, info_msg
     call println_str
     ret
 
@@ -214,8 +212,7 @@ exit_cmd db 'exit', 0
 welcome_msg db 'Welcome back to computer, master!', 0
 help_msg db 'Commands: help, info, clear, now, exit', 0
 
-info_msg_0 db 'Simplified OS v0.1.0', 0
-info_msg_1 db '(c) 2024 Kajizuka Taichi', 0
+info_msg db 'Simplified OS v0.1.0', 0x0D, 0x0A, '(c) 2024 Kajizuka Taichi', 0
 
 ; コマンド入力受け付け領域
 cmd_buf times 20 db 0
