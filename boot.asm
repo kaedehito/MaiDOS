@@ -1,10 +1,5 @@
-mov ax, 0x07c0
-mov ds, ax
-mov ah, 0x0
-mov al, 0x3
-int 0x10
-
 welcome:
+    call clear_screen
     mov si, welcome_msg
     call println_str
     call start
@@ -98,6 +93,12 @@ compare_cmd:
     je print_info
 
     mov si, cmd_buf
+    mov di, clear_cmd
+    call str_cmp
+    cmp ax, 1
+    je clear_screen
+
+    mov si, cmd_buf
     mov di, exit_cmd
     call str_cmp
     cmp ax, 1
@@ -115,6 +116,14 @@ print_info:
     call println_str
     mov si, info_msg_1
     call println_str
+    ret
+
+clear_screen:
+    mov ax, 0x07c0
+    mov ds, ax
+    mov ah, 0x0
+    mov al, 0x3
+    int 0x10
     ret
 
 halt_system:
@@ -150,6 +159,7 @@ prompt db 'SHELL> ', 0
 newline db 0x0D, 0x0A, 0
 
 help_cmd db 'help', 0
+clear_cmd db 'clear', 0
 info_cmd db 'info', 0
 exit_cmd db 'exit', 0
 
