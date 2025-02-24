@@ -17,7 +17,7 @@ main_loop:
     call get_key    ; ユーザー入力取得
 
     cmp al, 0x0D    ; Enterキーかチェック (0x0D = CR)
-    je execute_cmd  ; Enterが押されたらコマンド実行
+    je execute_cmd  ; 押されたらコマンド実行
 
     cmp al, 0x08    ; Backspaceキーかチェック (0x08 = BS)
     je backspace
