@@ -159,11 +159,11 @@ prompt db 'SHELL> ', 0
 newline db 0x0D, 0x0A, 0
 
 help_cmd db 'help', 0
-clear_cmd db 'clear', 0
 info_cmd db 'info', 0
+clear_cmd db 'clear', 0
 exit_cmd db 'exit', 0
 
-help_msg db 'Available commands: help, info, exit', 0
+help_msg db 'Available commands: help, info, clear, exit', 0
 welcome_msg db 'Welcome back to your computer, master!', 0
 
 info_msg_0 db 'Simplified OS v0.1.0', 0
