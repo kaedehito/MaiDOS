@@ -1,8 +1,11 @@
 welcome:
     call clear_screen
+
     mov si, welcome_msg
     call println_str
-    call start
+
+    mov si, newline
+    call print_str
 
 start:
     mov si, prompt  ; プロンプト文字列を表示
@@ -33,13 +36,13 @@ execute_cmd:
     mov si, newline
     call print_str
 
-    mov si, cmd_buf
+    mov si, cmd_buf     ; コマンドを比較
     call compare_cmd
 
-    mov si, newline
+    mov si, newline     ; 改行
     call print_str
 
-    jmp start
+    jmp start       ; プロンプト開始へ戻る
 
 backspace:
     cmp bx, 0
@@ -99,6 +102,12 @@ compare_cmd:
     je clear_screen
 
     mov si, cmd_buf
+    mov di, now_cmd
+    call str_cmp
+    cmp ax, 1
+    je show_now
+
+    mov si, cmd_buf
     mov di, exit_cmd
     call str_cmp
     cmp ax, 1
@@ -126,6 +135,30 @@ clear_screen:
     int 0x10
     ret
 
+show_now:
+    mov ah, 0x02    ; RTC (Real-Time Clock) から時刻を取得
+    int 0x1A        ; BIOS コール
+
+    mov al, ch      ;  時（CH）の変換と表示
+    call print_bcd
+
+    mov al, ':'     ; コロン記号
+    call print_char
+
+    mov al, cl      ; 分（CL）の変換と表示
+    call print_bcd
+
+    mov al, ':'     ; コロン記号
+    call print_char
+
+    mov al, dh      ;  秒（DH）の変換と表示
+    call print_bcd
+
+    mov si, newline ; 改行
+    call print_str
+
+    ret
+
 halt_system:
     cli
     hlt
@@ -150,17 +183,32 @@ no_match:
     xor ax, ax
     ret
 
+print_bcd:
+    push ax
+    mov ah, 0x0E  ; BIOS 文字表示(INT 0x10)
+
+    ; 上位4ビット (10の位) を取得して ASCII に変換
+    mov dl, al
+    shr dl, 4     ; 上位4ビット (10の位)
+    add dl, '0'   ; ASCII 変換
+    mov al, dl
+    int 0x10      ; 画面に表示
+
+    ; 下位4ビット (1の位) を取得して ASCII に変換
+    pop ax
+    and al, 0x0F  ; 下位4ビット (1の位)
+    add al, '0'   ; ASCII 変換
+    int 0x10      ; 画面に表示
+    ret
 
 
-; データ
-;--------------------------
-
-prompt db 'SHELL> ', 0
+prompt db 'Shell> ', 0
 newline db 0x0D, 0x0A, 0
 
 help_cmd db 'help', 0
 info_cmd db 'info', 0
 clear_cmd db 'clear', 0
+now_cmd db 'now', 0
 exit_cmd db 'exit', 0
 
 help_msg db 'Available commands: help, info, clear, exit', 0
