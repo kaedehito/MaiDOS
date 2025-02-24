@@ -128,7 +128,7 @@ print_info:
     ret
 
 clear_screen:
-    mov ax, 0x07c0
+    mov ax, 0x07c0  ; 画面をクリア
     mov ds, ax
     mov ah, 0x0
     mov al, 0x3
@@ -172,10 +172,10 @@ loop_cmp:
     cmp al, ah
     jne no_match
     test al, al
-    jz match     ; 両方の文字列が `0x00` に到達したら一致
+    jz match        ; 両方の文字列が `0x00` に到達したら一致
     inc si
     inc di
-    loop loop_cmp
+    loop loop_cmp   ; 比較ループ継続
 match:
     mov ax, 1
     ret
