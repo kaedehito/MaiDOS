@@ -1,7 +1,7 @@
 welcome:
     call clear_screen   ; BIOSの画面をクリア
 
-    mov si, welcome_msg ; 歓迎メッセージ
+    mov si, welcome_msg ; 起動メッセージ
     call println_str
 
     mov si, newline     ; 改行
@@ -34,10 +34,10 @@ main_loop:
 execute_cmd:
     mov byte [cmd_buf + bx], 0  ; 文字列終端を追加
 
-    mov si, newline
+    mov si, newline     ; 改行
     call print_str
 
-    mov si, cmd_buf     ; コマンドを比較
+    mov si, cmd_buf     ; コマンドを実行
     call compare_cmd
 
     mov si, newline     ; 改行
@@ -86,32 +86,32 @@ println_str:
 compare_cmd:
     mov si, cmd_buf     ; ヘルプ
     mov di, help_cmd
-    call str_cmp        ; 入力とコマンド名が同じか比較
+    call str_cmp        ; 入力とコマンド名"help"が同じか比較
     cmp ax, 1           ; ならば実行する
     je print_help
 
     mov si, cmd_buf     ; 情報
     mov di, info_cmd
-    call str_cmp
+    call str_cmp        ; 入力とコマンド名"info"が同じか比較
     cmp ax, 1
     je print_info
 
     mov si, cmd_buf     ; 画面クリア
     mov di, clear_cmd
-    call str_cmp
-    cmp ax, 1
+    call str_cmp        ; 入力とコマンド名"clear"が同じか比較
+    cmp ax, 1           ; ならば実行する
     je clear_screen
 
     mov si, cmd_buf     ; 今の時刻
     mov di, now_cmd
-    call str_cmp
-    cmp ax, 1
+    call str_cmp        ; 入力とコマンド名"now"が同じか比較
+    cmp ax, 1           ; ならば実行する
     je show_now
 
     mov si, cmd_buf     ; 終了
     mov di, exit_cmd
-    call str_cmp
-    cmp ax, 1
+    call str_cmp        ; 入力とコマンド名"exit"が同じか比較
+    cmp ax, 1           ; ならば実行する
     je halt_system
 
     ret
