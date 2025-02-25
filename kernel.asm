@@ -16,7 +16,7 @@ SHELL_start:
     mov bx, 0       ; 入力バッファのインデックスをリセット
 
 SHELL_mainloop:
-    call IO_getKey    ; ユーザー入力取得
+    call IO_getKey  ; ユーザー入力取得
 
     cmp al, 0x0D    ; Enterキーかチェック (0x0D = CR)
     je SHELL_execute; 押されたらコマンド実行
@@ -27,7 +27,7 @@ SHELL_mainloop:
     cmp bx, 19      ; バッファが一杯なら入力を制限
     jae SHELL_mainloop
 
-    call IO_printChar         ; 入力文字を画面に表示
+    call IO_printChar       ; 入力文字を画面に表示
     mov [BUF_cmd + bx], al  ; 入力をバッファに保存
     inc bx                  ; バッファを指すbxを進める
 
