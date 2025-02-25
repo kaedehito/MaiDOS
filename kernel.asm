@@ -23,8 +23,8 @@ SHELL_mainLoop:
     cmp al, 0x0D        ; Enterキーかチェック (0x0D = CR)
     je SHELL_execute    ; 押されたらコマンド実行
 
-    cmp al, ' '                 ; Enterキーかチェック (0x0D = CR)
-    je SHELL_mainLoop__space    ; 押されたらコマンド実行
+    cmp al, ' '                 ; Spaceキーかチェック (0x0D = CR)
+    je SHELL_mainLoop__space    ; 押されたら引数解析
 
     cmp al, 0x08        ; Backspaceキーかチェック (0x08 = BS)
     je IO_backspace
