@@ -44,7 +44,7 @@ SHELL_mainLoop__space:
     mov byte [BUF_input + bx], 0    ; Null文字をバッファに追加
     inc bx                          ; バッファを指すbxを進める
 
-    jmp SHELL_mainLoop          ; ループ継続
+    jmp SHELL_mainLoop              ; ループ継続
 
 SHELL_execute:
     mov byte [BUF_input + bx], 0    ; 文字列終端を追加
@@ -58,7 +58,7 @@ SHELL_execute:
     mov si, VAL_newLine     ; 改行
     call IO_printStr
 
-    jmp SHELL_start     ; プロンプト開始へ戻る
+    jmp SHELL_start         ; プロンプト開始へ戻る
 
 SHELL_matchCmd:
     mov si, BUF_input       ; ヘルプ
@@ -103,18 +103,18 @@ APP_help:
     jmp SHELL_matchCmd__success
 
 APP_clear:
-    mov ax, 0x07c0  ; 画面をクリア
+    mov ax, 0x07c0      ; 画面をクリア
     mov ds, ax
     mov ah, 0x0
     mov al, 0x3
-    int 0x10        ; BIOS コール
+    int 0x10            ; BIOS コール
     jmp SHELL_matchCmd__success
 
-APP_dup:    ; ２倍する
+APP_dup:                ; ２倍する
     mov ax, [BUF_input + 4]
-    sub ax, '0'     ; 数値に変換
+    sub ax, '0'         ; 数値に変換
     add ax, ax
-    add ax, '0'     ; 文字に戻す
+    add ax, '0'         ; 文字に戻す
     call IO_printChar
     jmp SHELL_matchCmd__success
 
@@ -160,8 +160,8 @@ IO_printChar:
     ret
 
 IO_printStr:
-    lodsb           ; 文字をロード
-    or al, al       ; Null文字か
+    lodsb               ; 文字をロード
+    or al, al           ; Null文字か
     jz IO_printStr__done    ; ならば終了
     call IO_printChar
     jmp IO_printStr         ; 次の文字へ
