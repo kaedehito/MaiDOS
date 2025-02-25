@@ -75,6 +75,12 @@ SHELL_matchCmd:
     cmp ax, 1           ; ならば実行する
     je APP_exit
 
+    mov si, VAL_errorMsg
+    call IO_printStr
+    mov si, BUF_input
+    call IO_printLnStr
+
+SHELL_matchCmd__success:
     ret
 
 
@@ -83,7 +89,7 @@ SHELL_matchCmd:
 APP_help:
     mov si, VAL_helpMsg    ; ヘルプを表示
     call IO_printLnStr
-    ret
+    jmp SHELL_matchCmd__success
 
 APP_clear:
     mov ax, 0x07c0  ; 画面をクリア
@@ -91,7 +97,7 @@ APP_clear:
     mov ah, 0x0
     mov al, 0x3
     int 0x10        ; BIOS コール
-    ret
+    jmp SHELL_matchCmd__success
 
 APP_dup:    ; ２倍する
     mov ax, [BUF_input + bx + 1]
@@ -99,7 +105,7 @@ APP_dup:    ; ２倍する
     add ax, ax
     add ax, '0'     ; 文字に戻す
     call IO_printChar
-    ret
+    jmp SHELL_matchCmd__success
 
 APP_exit:   ; システム終了
     cli
@@ -114,7 +120,7 @@ STR_compare__loop:
     mov al, [si]    ; SI: 入力文字列, DI: 比較対象
     mov ah, [di]
     cmp al, ah
-    jne STR_compare__no_match   ; 違えば終了
+    jne STR_compare__noMatch    ; 違えば終了
 
     test al, al
     jz STR_compare__match       ; 両方の文字列が Null文字に到達したら一致
@@ -127,7 +133,7 @@ STR_compare__loop:
 STR_compare__match:
     mov ax, 1
     ret
-STR_compare__no_match:
+STR_compare__noMatch:
     xor ax, ax
     ret
 
@@ -185,6 +191,7 @@ VAL_shcmdDup db 'dup', 0
 VAL_shcmdExit db 'exit', 0
 
 VAL_welcomeMsg db 'Welcome back to computer, master!', 0
+VAL_errorMsg db 'Error! unknown command: ', 0
 VAL_helpMsg db 'Simplified OS v0.1.0', 0x0D, 0x0A, \
     '(c) 2025 Kajizuka Taichi', 0x0D, 0x0A, \
     'Commands: help, dup, clear, exit', 0
@@ -192,6 +199,7 @@ VAL_helpMsg db 'Simplified OS v0.1.0', 0x0D, 0x0A, \
 ; コマンド入力受け付け用バッファ領域
 BUF_input times 20 db 0
 
+; 残りのバイト列を埋める
 times 510-($-$$) db 0
 db 0x55
 db 0xAA
