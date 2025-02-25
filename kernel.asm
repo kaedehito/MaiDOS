@@ -1,4 +1,4 @@
-; === Simplified OS ===
+; === MaiDOS ===
 
 welcome:
     call APP_clear          ; BIOSの画面をクリア
@@ -212,7 +212,7 @@ VAL_shCmdExit db 'exit', 0
 ; メッセージ群
 VAL_msgWelcome db 'Welcome back to computer, master!', 0
 VAL_msgError db 'Error! unknown command: ', 0
-VAL_msgHelp db 'Simplified OS v0.1.0', 0x0D, 0x0A, \
+VAL_msgHelp db 'MaiDOS v0.2.5', 0x0D, 0x0A, \
     '(c) 2025 Kajizuka Taichi', 0x0D, 0x0A, \
     'Commands: echo, clear, help, exit', 0
 
