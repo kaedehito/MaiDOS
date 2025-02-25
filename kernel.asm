@@ -5,9 +5,8 @@ welcome:
 
     mov si, VAL_msgWelcome  ; 起動メッセージ
     call IO_printStr
-
-    mov si, VAL_newLine     ; 改行
-    call IO_printStr
+    call IO_printNewLine
+    call IO_printNewLine
 
 
 ; === シェル ===
