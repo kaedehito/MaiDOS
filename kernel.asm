@@ -39,7 +39,7 @@ SHELL_execute:
     mov si, VAL_newline     ; 改行
     call IO_printStr
 
-    mov si, BUF_cmd     ; コマンドを実行
+    mov si, BUF_cmd         ; コマンドを実行
     call SHELL_matchCmd
 
     mov si, VAL_newline     ; 改行
