@@ -13,7 +13,7 @@ SHELL_start:
     mov si, VAL_prompt  ; プロンプト文字列を表示
     call IO_printStr
 
-    mov bx, 0       ; 入力バッファのインデックスをリセット
+    mov bx, 0       ; 入力バッファのインデックスを初期化
 
 SHELL_mainloop:
     call IO_getKey  ; ユーザー入力取得
