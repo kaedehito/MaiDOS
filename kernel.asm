@@ -4,7 +4,7 @@ welcome:
     call APP_clear          ; BIOSの画面をクリア
 
     mov si, VAL_msgWelcome  ; 起動メッセージ
-    call IO_printLnStr
+    call IO_printStr
 
     mov si, VAL_newLine     ; 改行
     call IO_printStr
@@ -48,15 +48,13 @@ SHELL_mainLoop__space:
 
 SHELL_execute:
     mov byte [BUF_input + bx], 0    ; 文字列終端を追加
-
-    mov si, VAL_newLine     ; 改行
-    call IO_printStr
+    call IO_printStr                ; 改行
 
     mov si, BUF_input       ; コマンドを実行
     call SHELL_matchCmd
 
-    mov si, VAL_newLine     ; 改行
-    call IO_printStr
+    call IO_printNewLine    ; 2回改行
+    call IO_printNewLine
 
     jmp SHELL_start         ; プロンプト開始へ戻る
 
@@ -74,10 +72,10 @@ SHELL_matchCmd:
     je APP_clear
 
     mov si, BUF_input       ; ２倍
-    mov di, VAL_shCmdDup
+    mov di, VAL_shCmdEcho
     call STR_compare        ; 入力とコマンド名"dup"が同じか比較
     cmp ax, 1               ; ならば実行する
-    je APP_dup
+    je APP_echo
 
     mov si, BUF_input       ; 終了
     mov di, VAL_shCmdExit
@@ -85,11 +83,10 @@ SHELL_matchCmd:
     cmp ax, 1               ; ならば実行する
     je APP_exit
 
-
     mov si, VAL_msgError    ; マッチしない場合
     call IO_printStr
-    mov si, BUF_input
-    call IO_printLnStr
+    mov si, BUF_input       ; エラーメッセージを出力
+    call IO_printStr
 
 SHELL_matchCmd__success:
     ret
@@ -99,7 +96,7 @@ SHELL_matchCmd__success:
 
 APP_help:
     mov si, VAL_msgHelp    ; ヘルプを表示
-    call IO_printLnStr
+    call IO_printStr
     jmp SHELL_matchCmd__success
 
 APP_clear:
@@ -110,12 +107,10 @@ APP_clear:
     int 0x10            ; BIOS コール
     jmp SHELL_matchCmd__success
 
-APP_dup:                ; ２倍する
-    mov ax, [BUF_input + 4]
-    sub ax, '0'         ; 数値に変換
-    add ax, ax
-    add ax, '0'         ; 文字に戻す
-    call IO_printChar
+APP_echo:                ; 画面表示する
+    mov si, BUF_input
+    add si, 5
+    call IO_printStr
     jmp SHELL_matchCmd__success
 
 APP_exit:   ; システム終了
@@ -160,16 +155,15 @@ IO_printChar:
     ret
 
 IO_printStr:
-    lodsb               ; 文字をロード
-    or al, al           ; Null文字か
+    lodsb                   ; 文字をロード
+    or al, al               ; Null文字か
     jz IO_printStr__done    ; ならば終了
     call IO_printChar
     jmp IO_printStr         ; 次の文字へ
 IO_printStr__done:
     ret
 
-IO_printLnStr:          ; 改行を出力
-    call IO_printStr
+IO_printNewLine:          ; 改行を出力
     mov si, VAL_newLine
     call IO_printStr
     ret
@@ -196,9 +190,10 @@ VAL_newLine db 0x0D, 0x0A, 0
 ; コマンド群
 VAL_shCmdHelp db 'help', 0
 VAL_shCmdClear db 'clear', 0
-VAL_shCmdDup db 'dup', 0
+VAL_shCmdEcho db 'echo', 0
 VAL_shCmdExit db 'exit', 0
 
+; メッセージ群
 VAL_msgWelcome db 'Welcome back to computer, master!', 0
 VAL_msgError db 'Error! unknown command: ', 0
 VAL_msgHelp db 'Simplified OS v0.1.0', 0x0D, 0x0A, \
@@ -210,5 +205,6 @@ BUF_input times 20 db 0
 
 ; 残りのバイト列を埋める
 times 510-($-$$) db 0
+; ブートセクタの印
 db 0x55
 db 0xAA
