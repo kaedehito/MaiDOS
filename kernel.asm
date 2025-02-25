@@ -3,17 +3,17 @@
 welcome:
     call APP_clear          ; BIOSの画面をクリア
 
-    mov si, VAL_welcomeMsg  ; 起動メッセージ
+    mov si, VAL_msgWelcome  ; 起動メッセージ
     call IO_printLnStr
 
-    mov si, VAL_newline     ; 改行
+    mov si, VAL_newLine     ; 改行
     call IO_printStr
 
 
 ; === シェル ===
 
 SHELL_start:
-    mov si, VAL_shprompt    ; プロンプト文字列を表示
+    mov si, VAL_shPrompt    ; プロンプト文字列を表示
     call IO_printStr
 
     mov bx, 0       ; 入力バッファのインデックスを初期化
@@ -39,43 +39,44 @@ SHELL_mainloop:
 SHELL_execute:
     mov byte [BUF_input + bx], 0  ; 文字列終端を追加
 
-    mov si, VAL_newline     ; 改行
+    mov si, VAL_newLine     ; 改行
     call IO_printStr
 
     mov si, BUF_input         ; コマンドを実行
     call SHELL_matchCmd
 
-    mov si, VAL_newline     ; 改行
+    mov si, VAL_newLine     ; 改行
     call IO_printStr
 
     jmp SHELL_start     ; プロンプト開始へ戻る
 
 SHELL_matchCmd:
-    mov si, BUF_input     ; ヘルプ
-    mov di, VAL_shcmdHelp
-    call STR_compare    ; 入力とコマンド名"help"が同じか比較
-    cmp ax, 1           ; ならば実行する
+    mov si, BUF_input       ; ヘルプ
+    mov di, VAL_shCmdHelp
+    call STR_compare        ; 入力とコマンド名"help"が同じか比較
+    cmp ax, 1               ; ならば実行する
     je APP_help
 
-    mov si, BUF_input     ; 画面クリア
-    mov di, VAL_shcmdClear
-    call STR_compare    ; 入力とコマンド名"clear"が同じか比較
-    cmp ax, 1           ; ならば実行する
+    mov si, BUF_input       ; 画面クリア
+    mov di, VAL_shCmdClear
+    call STR_compare        ; 入力とコマンド名"clear"が同じか比較
+    cmp ax, 1               ; ならば実行する
     je APP_clear
 
-    mov si, BUF_input     ; ２倍
-    mov di, VAL_shcmdDup
+    mov si, BUF_input       ; ２倍
+    mov di, VAL_shCmdDup
     call STR_compare        ; 入力とコマンド名"dup"が同じか比較
-    cmp ax, 1           ; ならば実行する
+    cmp ax, 1               ; ならば実行する
     je APP_dup
 
-    mov si, BUF_input     ; 終了
-    mov di, VAL_shcmdExit
-    call STR_compare    ; 入力とコマンド名"exit"が同じか比較
-    cmp ax, 1           ; ならば実行する
+    mov si, BUF_input       ; 終了
+    mov di, VAL_shCmdExit
+    call STR_compare        ; 入力とコマンド名"exit"が同じか比較
+    cmp ax, 1               ; ならば実行する
     je APP_exit
 
-    mov si, VAL_errorMsg
+
+    mov si, VAL_msgError    ; マッチしない場合
     call IO_printStr
     mov si, BUF_input
     call IO_printLnStr
@@ -87,7 +88,7 @@ SHELL_matchCmd__success:
 ; === アプリ ===
 
 APP_help:
-    mov si, VAL_helpMsg    ; ヘルプを表示
+    mov si, VAL_msgHelp    ; ヘルプを表示
     call IO_printLnStr
     jmp SHELL_matchCmd__success
 
@@ -161,7 +162,7 @@ IO_printStr__done:
 
 IO_printLnStr:          ; 改行を出力
     call IO_printStr
-    mov si, VAL_newline
+    mov si, VAL_newLine
     call IO_printStr
     ret
 
@@ -181,18 +182,18 @@ IO_backspace:
 
 ; === データ ===
 
-VAL_shprompt db '[sh]> ', 0
-VAL_newline db 0x0D, 0x0A, 0
+VAL_shPrompt db '[sh]> ', 0
+VAL_newLine db 0x0D, 0x0A, 0
 
 ; コマンド群
-VAL_shcmdHelp db 'help', 0
-VAL_shcmdClear db 'clear', 0
-VAL_shcmdDup db 'dup', 0
-VAL_shcmdExit db 'exit', 0
+VAL_shCmdHelp db 'help', 0
+VAL_shCmdClear db 'clear', 0
+VAL_shCmdDup db 'dup', 0
+VAL_shCmdExit db 'exit', 0
 
-VAL_welcomeMsg db 'Welcome back to computer, master!', 0
-VAL_errorMsg db 'Error! unknown command: ', 0
-VAL_helpMsg db 'Simplified OS v0.1.0', 0x0D, 0x0A, \
+VAL_msgWelcome db 'Welcome back to computer, master!', 0
+VAL_msgError db 'Error! unknown command: ', 0
+VAL_msgHelp db 'Simplified OS v0.1.0', 0x0D, 0x0A, \
     '(c) 2025 Kajizuka Taichi', 0x0D, 0x0A, \
     'Commands: help, dup, clear, exit', 0
 
