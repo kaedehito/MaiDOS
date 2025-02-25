@@ -2,21 +2,21 @@ welcome:
     call APP_clear          ; BIOSの画面をクリア
 
     mov si, VAL_welcomeMsg  ; 起動メッセージ
-    call IO_printlnstr
+    call IO_printLnStr
 
     mov si, VAL_newline     ; 改行
-    call IO_printstr
+    call IO_printStr
 
 ; === シェル ===
 
 SHELL_start:
     mov si, VAL_prompt  ; プロンプト文字列を表示
-    call IO_printstr
+    call IO_printStr
 
     mov bx, 0       ; 入力バッファのインデックスをリセット
 
 SHELL_mainloop:
-    call IO_getkey    ; ユーザー入力取得
+    call IO_getKey    ; ユーザー入力取得
 
     cmp al, 0x0D    ; Enterキーかチェック (0x0D = CR)
     je SHELL_execute; 押されたらコマンド実行
@@ -27,7 +27,7 @@ SHELL_mainloop:
     cmp bx, 19      ; バッファが一杯なら入力を制限
     jae SHELL_mainloop
 
-    call IO_printchar         ; 入力文字を画面に表示
+    call IO_printChar         ; 入力文字を画面に表示
     mov [BUF_cmd + bx], al  ; 入力をバッファに保存
     inc bx                  ; バッファを指すbxを進める
 
@@ -37,13 +37,13 @@ SHELL_execute:
     mov byte [BUF_cmd + bx], 0  ; 文字列終端を追加
 
     mov si, VAL_newline     ; 改行
-    call IO_printstr
+    call IO_printStr
 
     mov si, BUF_cmd     ; コマンドを実行
     call SHELL_matchCmd
 
     mov si, VAL_newline     ; 改行
-    call IO_printstr
+    call IO_printStr
 
     jmp SHELL_start     ; プロンプト開始へ戻る
 
@@ -78,7 +78,7 @@ SHELL_matchCmd:
 
 APP_help:
     mov si, VAL_helpMsg    ; ヘルプを表示
-    call IO_printlnstr
+    call IO_printLnStr
     ret
 
 APP_clear:
@@ -94,7 +94,7 @@ APP_dup:    ; ２倍する
     sub ax, '0'
     add ax, ax
     add ax, '0'
-    call IO_printchar
+    call IO_printChar
     ret
 
 APP_exit:   ; システム終了
@@ -130,29 +130,29 @@ STR_compare__no_match:
 
 ; === 入出力処理(IO) ===
 
-IO_getkey:
+IO_getKey:
     mov ah, 0x00    ; 入力
     int 0x16        ; BIOS コール
     ret
 
-IO_printchar:
+IO_printChar:
     mov ah, 0x0E    ; 出力
     int 0x10        ; BIOS コール
     ret
 
-IO_printstr:
+IO_printStr:
     lodsb           ; 文字をロード
     or al, al       ; Null文字か
-    jz IO_printstr__done    ; ならば終了
-    call IO_printchar
-    jmp IO_printstr         ; 次の文字へ
-IO_printstr__done:
+    jz IO_printStr__done    ; ならば終了
+    call IO_printChar
+    jmp IO_printStr         ; 次の文字へ
+IO_printStr__done:
     ret
 
-IO_printlnstr:
-    call IO_printstr
+IO_printLnStr:
+    call IO_printStr
     mov si, VAL_newline ; 改行を出力
-    call IO_printstr
+    call IO_printStr
     ret
 
 IO_backspace:
