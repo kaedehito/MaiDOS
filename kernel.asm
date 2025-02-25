@@ -99,18 +99,18 @@ APP_help:
     call IO_printStr
     jmp SHELL_matchCmd__success
 
+APP_echo:                ; 画面表示する
+    mov si, BUF_input
+    add si, 5
+    call IO_printStr
+    jmp SHELL_matchCmd__success
+
 APP_clear:
     mov ax, 0x07c0      ; 画面をクリア
     mov ds, ax
     mov ah, 0x0
     mov al, 0x3
     int 0x10            ; BIOS コール
-    jmp SHELL_matchCmd__success
-
-APP_echo:                ; 画面表示する
-    mov si, BUF_input
-    add si, 5
-    call IO_printStr
     jmp SHELL_matchCmd__success
 
 APP_exit:   ; システム終了
@@ -189,8 +189,8 @@ VAL_newLine db 0x0D, 0x0A, 0
 
 ; コマンド群
 VAL_shCmdHelp db 'help', 0
-VAL_shCmdClear db 'clear', 0
 VAL_shCmdEcho db 'echo', 0
+VAL_shCmdClear db 'clear', 0
 VAL_shCmdExit db 'exit', 0
 
 ; メッセージ群
