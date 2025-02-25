@@ -7,8 +7,8 @@
 
 このリポジトリをローカルにクローンして、`make`でビルドして実行します。
 ```bash
-git clone https://github.com/KajizukaTaichi/SimplifiedOS.git
-cd ./SimplifiedOS
+git clone https://github.com/KajizukaTaichi/MaiDOS.git
+cd ./MaiDOS
 make
 ```
 ビルドには以下のツールが必要になります。
