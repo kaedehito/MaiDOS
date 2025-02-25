@@ -1,53 +1,163 @@
 welcome:
-    call clear_screen   ; BIOSの画面をクリア
+    call APP_clear          ; BIOSの画面をクリア
 
-    mov si, welcome_msg ; 起動メッセージ
-    call println_str
+    mov si, VAL_welcomeMsg  ; 起動メッセージ
+    call IO_printlnstr
 
-    mov si, newline     ; 改行
-    call print_str
+    mov si, VAL_newline     ; 改行
+    call IO_printstr
 
-start:
-    mov si, prompt  ; プロンプト文字列を表示
-    call print_str
+; === シェル ===
+
+SHELL_start:
+    mov si, VAL_prompt  ; プロンプト文字列を表示
+    call IO_printstr
 
     mov bx, 0       ; 入力バッファのインデックスをリセット
 
-main_loop:
-    call get_key    ; ユーザー入力取得
+SHELL_mainloop:
+    call IO_getkey    ; ユーザー入力取得
 
     cmp al, 0x0D    ; Enterキーかチェック (0x0D = CR)
-    je execute_cmd  ; 押されたらコマンド実行
+    je SHELL_execute; 押されたらコマンド実行
 
     cmp al, 0x08    ; Backspaceキーかチェック (0x08 = BS)
-    je backspace
+    je IO_backspace
 
     cmp bx, 19      ; バッファが一杯なら入力を制限
-    jae main_loop
+    jae SHELL_mainloop
 
-    call print_char         ; 入力文字を画面に表示
-    mov [cmd_buf + bx], al  ; 入力をバッファに保存
+    call IO_printchar         ; 入力文字を画面に表示
+    mov [BUF_cmd + bx], al  ; 入力をバッファに保存
     inc bx                  ; バッファを指すbxを進める
 
-    jmp main_loop           ; ループ継続
+    jmp SHELL_mainloop      ; ループ継続
 
-execute_cmd:
-    mov byte [cmd_buf + bx], 0  ; 文字列終端を追加
+SHELL_execute:
+    mov byte [BUF_cmd + bx], 0  ; 文字列終端を追加
 
-    mov si, newline     ; 改行
-    call print_str
+    mov si, VAL_newline     ; 改行
+    call IO_printstr
 
-    mov si, cmd_buf     ; コマンドを実行
-    call compare_cmd
+    mov si, BUF_cmd     ; コマンドを実行
+    call SHELL_matchCmd
 
-    mov si, newline     ; 改行
-    call print_str
+    mov si, VAL_newline     ; 改行
+    call IO_printstr
 
-    jmp start       ; プロンプト開始へ戻る
+    jmp SHELL_start     ; プロンプト開始へ戻る
 
-backspace:
+SHELL_matchCmd:
+    mov si, BUF_cmd     ; ヘルプ
+    mov di, VAL_shcmdHelp
+    call STR_compare    ; 入力とコマンド名"help"が同じか比較
+    cmp ax, 1           ; ならば実行する
+    je APP_help
+
+    mov si, BUF_cmd     ; 画面クリア
+    mov di, VAL_shcmdClear
+    call STR_compare    ; 入力とコマンド名"clear"が同じか比較
+    cmp ax, 1           ; ならば実行する
+    je APP_clear
+
+    mov si, BUF_cmd     ; ２倍
+    mov di, VAL_shcmdDup
+    call STR_compare        ; 入力とコマンド名"dup"が同じか比較
+    cmp ax, 1           ; ならば実行する
+    je APP_dup
+
+    mov si, BUF_cmd     ; 終了
+    mov di, VAL_shcmdExit
+    call STR_compare    ; 入力とコマンド名"exit"が同じか比較
+    cmp ax, 1           ; ならば実行する
+    je APP_exit
+
+    ret
+
+; === アプリ ===
+
+APP_help:
+    mov si, VAL_helpMsg    ; ヘルプを表示
+    call IO_printlnstr
+    ret
+
+APP_clear:
+    mov ax, 0x07c0  ; 画面をクリア
+    mov ds, ax
+    mov ah, 0x0
+    mov al, 0x3
+    int 0x10        ; BIOS コール
+    ret
+
+APP_dup:    ; ２倍する
+    mov ax, [BUF_cmd + bx + 1]
+    sub ax, '0'
+    add ax, ax
+    add ax, '0'
+    call IO_printchar
+    ret
+
+APP_exit:   ; システム終了
+    cli
+    hlt
+
+
+; === 文字列操作 ===
+
+STR_compare:       ; 文字列比較
+    mov cx, 20      ; 最大20文字比較
+STR_compare__loop:
+    mov al, [si]    ; SI: 入力文字列, DI: 比較対象
+    mov ah, [di]
+    cmp al, ah
+    jne STR_compare__no_match   ; 違えば終了
+
+    test al, al
+    jz STR_compare__match       ; 両方の文字列が Null文字に到達したら一致
+    cmp al, ' '
+    je STR_compare__match       ; スペースでも終了
+
+    inc si
+    inc di
+    jmp STR_compare__loop       ; 比較ループ継続
+STR_compare__match:
+    mov ax, 1
+    ret
+STR_compare__no_match:
+    xor ax, ax
+    ret
+
+
+; === 入出力処理(IO) ===
+
+IO_getkey:
+    mov ah, 0x00    ; 入力
+    int 0x16        ; BIOS コール
+    ret
+
+IO_printchar:
+    mov ah, 0x0E    ; 出力
+    int 0x10        ; BIOS コール
+    ret
+
+IO_printstr:
+    lodsb           ; 文字をロード
+    or al, al       ; Null文字か
+    jz IO_printstr__done    ; ならば終了
+    call IO_printchar
+    jmp IO_printstr         ; 次の文字へ
+IO_printstr__done:
+    ret
+
+IO_printlnstr:
+    call IO_printstr
+    mov si, VAL_newline ; 改行を出力
+    call IO_printstr
+    ret
+
+IO_backspace:
     cmp bx, 0
-    jz main_loop    ; 何も入力されていなければスキップ
+    jz SHELL_mainloop    ; 何も入力されていなければスキップ
     dec bx
     mov ah, 0x0E
     mov al, 0x08
@@ -56,123 +166,25 @@ backspace:
     int 0x10        ; 空白を上書き
     mov al, 0x08
     int 0x10        ; カーソルを再び戻す
-    jmp main_loop
+    jmp SHELL_mainloop
 
-get_key:
-    mov ah, 0x00    ; 入力
-    int 0x16        ; BIOS コール
-    ret
+; === データ ===
 
-print_char:
-    mov ah, 0x0E    ; 出力
-    int 0x10        ; BIOS コール
-    ret
+VAL_prompt db '[sh]> ', 0
+VAL_newline db 0x0D, 0x0A, 0
 
-print_str:
-    lodsb           ; 文字をロード
-    or al, al       ; Null文字か
-    jz done         ; ならば終了
-    call print_char
-    jmp print_str   ; 次の文字へ
-done:
-    ret
+VAL_shcmdHelp db 'help', 0
+VAL_shcmdClear db 'clear', 0
+VAL_shcmdDup db 'dup', 0
+VAL_shcmdExit db 'exit', 0
 
-println_str:
-    call print_str
-    mov si, newline ; 改行を出力
-    call print_str
-    ret
-
-compare_cmd:
-    mov si, cmd_buf     ; ヘルプ
-    mov di, shcmd_help
-    call str_cmp        ; 入力とコマンド名"help"が同じか比較
-    cmp ax, 1           ; ならば実行する
-    je print_help
-
-    mov si, cmd_buf     ; 画面クリア
-    mov di, shcmd_clear
-    call str_cmp        ; 入力とコマンド名"clear"が同じか比較
-    cmp ax, 1           ; ならば実行する
-    je clear_screen
-
-    mov si, cmd_buf     ; ２倍
-    mov di, shcmd_dup
-    call str_cmp        ; 入力とコマンド名"dup"が同じか比較
-    cmp ax, 1           ; ならば実行する
-    je dup_arg
-
-    mov si, cmd_buf     ; 終了
-    mov di, shcmd_exit
-    call str_cmp        ; 入力とコマンド名"exit"が同じか比較
-    cmp ax, 1           ; ならば実行する
-    je halt_system
-
-    ret
-
-print_help:
-    mov si, help_msg    ; ヘルプを表示
-    call println_str
-    ret
-
-clear_screen:
-    mov ax, 0x07c0  ; 画面をクリア
-    mov ds, ax
-    mov ah, 0x0
-    mov al, 0x3
-    int 0x10        ; BIOS コール
-    ret
-
-dup_arg:
-    mov ax, [cmd_buf + bx + 1]
-    sub ax, '0'
-    add ax, ax
-    add ax, '0'
-    call print_char
-    ret
-
-halt_system:        ; システム終了
-    cli
-    hlt
-
-str_cmp:            ; 文字列比較
-    mov cx, 20      ; 最大20文字比較
-loop_cmp:
-    mov al, [si]    ; SI: 入力文字列, DI: 比較対象
-    mov ah, [di]
-    cmp al, ah
-    jne no_match    ; 違えば終了
-
-    test al, al
-    jz match        ; 両方の文字列が Null文字に到達したら一致
-    cmp al, ' '
-    je match        ; スペースでも終了
-
-    inc si
-    inc di
-    jmp loop_cmp   ; 比較ループ継続
-match:
-    mov ax, 1
-    ret
-no_match:
-    xor ax, ax
-    ret
-
-prompt db '[sh]> ', 0
-newline db 0x0D, 0x0A, 0
-
-shcmd_help db 'help', 0
-shcmd_clear db 'clear', 0
-shcmd_dup db 'dup', 0
-shcmd_exit db 'exit', 0
-
-welcome_msg db 'Welcome back to computer, master!', 0
-help_msg db 'Simplified OS v0.1.0', 0x0D, 0x0A, \
+VAL_welcomeMsg db 'Welcome back to computer, master!', 0
+VAL_helpMsg db 'Simplified OS v0.1.0', 0x0D, 0x0A, \
     '(c) 2024 Kajizuka Taichi', 0x0D, 0x0A, \
     'Commands: help, dup, clear, exit', 0
 
-; コマンド入力受け付け領域
-cmd_buf times 20 db 0
+; コマンド入力受け付け用バッファ領域
+BUF_cmd times 20 db 0
 
 times 510-($-$$) db 0
 db 0x55
