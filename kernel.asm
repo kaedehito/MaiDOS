@@ -45,24 +45,29 @@ SHELL_mainLoop__space:
 
     jmp SHELL_mainLoop              ; ループ継続
 
+
 SHELL_execute:
+    ; === シェルコマンドを実行 ===
+
     mov byte [BUF_input + bx], 0    ; 文字列終端を追加
     call IO_printStr                ; 改行
 
-    mov si, BUF_input       ; コマンドを実行
-    call SHELL_matchCmd
+    mov si, BUF_input       ; アプリ起動
+    call KERNEL_launchApp
 
     call IO_printNewLine    ; 2回改行
     call IO_printNewLine
 
     jmp SHELL_start         ; プロンプト開始へ戻る
 
-SHELL_matchCmd:
-    mov si, BUF_input       ; ヘルプ
-    mov di, VAL_shCmdHelp
-    call STR_compare        ; 入力とコマンド名"help"が同じか比較
+KERNEL_launchApp:
+    ; == アプリを起動 ==
+
+    mov si, BUF_input       ; 表示
+    mov di, VAL_shCmdEcho
+    call STR_compare        ; 入力とコマンド名"echo"が同じか比較
     cmp ax, 1               ; ならば実行する
-    je APP_help
+    je APP_echo
 
     mov si, BUF_input       ; 画面クリア
     mov di, VAL_shCmdClear
@@ -70,11 +75,11 @@ SHELL_matchCmd:
     cmp ax, 1               ; ならば実行する
     je APP_clear
 
-    mov si, BUF_input       ; ２倍
-    mov di, VAL_shCmdEcho
-    call STR_compare        ; 入力とコマンド名"dup"が同じか比較
+    mov si, BUF_input       ; ヘルプ
+    mov di, VAL_shCmdHelp
+    call STR_compare        ; 入力とコマンド名"help"が同じか比較
     cmp ax, 1               ; ならば実行する
-    je APP_echo
+    je APP_help
 
     mov si, BUF_input       ; 終了
     mov di, VAL_shCmdExit
@@ -87,35 +92,38 @@ SHELL_matchCmd:
     mov si, BUF_input       ; エラーメッセージを出力
     call IO_printStr
 
-SHELL_matchCmd__success:
+KERNEL_appSuccess:
     ret
 
 
 ; === アプリ ===
 
-APP_help:
-    mov si, VAL_msgHelp    ; ヘルプを表示
-    call IO_printStr
-    jmp SHELL_matchCmd__success
-
-APP_echo:                ; 画面表示する
+APP_echo:
+    ; == 引数を表示 ==
     mov si, BUF_input
     add si, 5
     call IO_printStr
-    jmp SHELL_matchCmd__success
+    jmp KERNEL_appSuccess
 
 APP_clear:
-    mov ax, 0x07c0      ; 画面をクリア
+    ; == 画面をクリア ==
+    mov ax, 0x07c0
     mov ds, ax
     mov ah, 0x0
     mov al, 0x3
     int 0x10            ; BIOS コール
-    jmp SHELL_matchCmd__success
+    jmp KERNEL_appSuccess
 
-APP_exit:   ; システム終了
+APP_help:
+    ; == ヘルプを表示 ==
+    mov si, VAL_msgHelp    ; ヘルプを表示
+    call IO_printStr
+    jmp KERNEL_appSuccess
+
+APP_exit:
+    ;  == CPU停止 ==
     cli
     hlt
-
 
 ; === 文字列操作 ===
 
@@ -187,9 +195,9 @@ VAL_shPrompt db '[sh]> ', 0
 VAL_newLine db 0x0D, 0x0A, 0
 
 ; コマンド群
-VAL_shCmdHelp db 'help', 0
 VAL_shCmdEcho db 'echo', 0
 VAL_shCmdClear db 'clear', 0
+VAL_shCmdHelp db 'help', 0
 VAL_shCmdExit db 'exit', 0
 
 ; メッセージ群
@@ -197,7 +205,7 @@ VAL_msgWelcome db 'Welcome back to computer, master!', 0
 VAL_msgError db 'Error! unknown command: ', 0
 VAL_msgHelp db 'Simplified OS v0.1.0', 0x0D, 0x0A, \
     '(c) 2025 Kajizuka Taichi', 0x0D, 0x0A, \
-    'Commands: help, echo, clear, exit', 0
+    'Commands: echo, clear, help, exit', 0
 
 ; コマンド入力受け付け用バッファ領域
 BUF_input times 50 db 0
