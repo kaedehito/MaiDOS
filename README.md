@@ -1,7 +1,6 @@
 # MaiDOS
 
-![image](https://github.com/user-attachments/assets/564a89bb-1990-46ed-b871-435faf363412)
-
+![](https://github.com/user-attachments/assets/7c5fffd2-d883-4c6b-bc1b-1f2c7092b148)
 
 ## 起動方法
 
