@@ -10,7 +10,7 @@ welcome:
 ; === シェル ===
 
 SHELL_start:
-    mov si, VAL_prompt  ; プロンプト文字列を表示
+    mov si, VAL_shprompt    ; プロンプト文字列を表示
     call IO_printStr
 
     mov bx, 0       ; 入力バッファのインデックスを初期化
@@ -28,18 +28,18 @@ SHELL_mainloop:
     jae SHELL_mainloop
 
     call IO_printChar       ; 入力文字を画面に表示
-    mov [BUF_cmd + bx], al  ; 入力をバッファに保存
+    mov [BUF_input + bx], al  ; 入力をバッファに保存
     inc bx                  ; バッファを指すbxを進める
 
     jmp SHELL_mainloop      ; ループ継続
 
 SHELL_execute:
-    mov byte [BUF_cmd + bx], 0  ; 文字列終端を追加
+    mov byte [BUF_input + bx], 0  ; 文字列終端を追加
 
     mov si, VAL_newline     ; 改行
     call IO_printStr
 
-    mov si, BUF_cmd         ; コマンドを実行
+    mov si, BUF_input         ; コマンドを実行
     call SHELL_matchCmd
 
     mov si, VAL_newline     ; 改行
@@ -48,25 +48,25 @@ SHELL_execute:
     jmp SHELL_start     ; プロンプト開始へ戻る
 
 SHELL_matchCmd:
-    mov si, BUF_cmd     ; ヘルプ
+    mov si, BUF_input     ; ヘルプ
     mov di, VAL_shcmdHelp
     call STR_compare    ; 入力とコマンド名"help"が同じか比較
     cmp ax, 1           ; ならば実行する
     je APP_help
 
-    mov si, BUF_cmd     ; 画面クリア
+    mov si, BUF_input     ; 画面クリア
     mov di, VAL_shcmdClear
     call STR_compare    ; 入力とコマンド名"clear"が同じか比較
     cmp ax, 1           ; ならば実行する
     je APP_clear
 
-    mov si, BUF_cmd     ; ２倍
+    mov si, BUF_input     ; ２倍
     mov di, VAL_shcmdDup
     call STR_compare        ; 入力とコマンド名"dup"が同じか比較
     cmp ax, 1           ; ならば実行する
     je APP_dup
 
-    mov si, BUF_cmd     ; 終了
+    mov si, BUF_input     ; 終了
     mov di, VAL_shcmdExit
     call STR_compare    ; 入力とコマンド名"exit"が同じか比較
     cmp ax, 1           ; ならば実行する
@@ -90,7 +90,7 @@ APP_clear:
     ret
 
 APP_dup:    ; ２倍する
-    mov ax, [BUF_cmd + bx + 1]
+    mov ax, [BUF_input + bx + 1]
     sub ax, '0'     ; 数値に変換
     add ax, ax
     add ax, '0'     ; 文字に戻す
@@ -104,7 +104,7 @@ APP_exit:   ; システム終了
 
 ; === 文字列操作 ===
 
-STR_compare:       ; 文字列比較
+STR_compare:        ; 文字列比較
     mov cx, 20      ; 最大20文字比較
 STR_compare__loop:
     mov al, [si]    ; SI: 入力文字列, DI: 比較対象
@@ -170,9 +170,10 @@ IO_backspace:
 
 ; === データ ===
 
-VAL_prompt db '[sh]> ', 0
+VAL_shprompt db '[sh]> ', 0
 VAL_newline db 0x0D, 0x0A, 0
 
+; コマンド群
 VAL_shcmdHelp db 'help', 0
 VAL_shcmdClear db 'clear', 0
 VAL_shcmdDup db 'dup', 0
@@ -184,7 +185,7 @@ VAL_helpMsg db 'Simplified OS v0.1.0', 0x0D, 0x0A, \
     'Commands: help, dup, clear, exit', 0
 
 ; コマンド入力受け付け用バッファ領域
-BUF_cmd times 20 db 0
+BUF_input times 20 db 0
 
 times 510-($-$$) db 0
 db 0x55
