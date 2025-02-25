@@ -18,7 +18,7 @@ SHELL_start:
 
     mov bx, 0       ; 入力バッファのインデックスを初期化
 
-SHELL_mainloop:
+SHELL_mainLoop:
     call IO_getKey  ; ユーザー入力取得
 
     cmp al, 0x0D    ; Enterキーかチェック (0x0D = CR)
@@ -28,13 +28,13 @@ SHELL_mainloop:
     je IO_backspace
 
     cmp bx, 19      ; バッファが一杯なら入力を制限
-    jae SHELL_mainloop
+    jae SHELL_mainLoop
 
     call IO_printChar       ; 入力文字を画面に表示
     mov [BUF_input + bx], al  ; 入力をバッファに保存
     inc bx                  ; バッファを指すbxを進める
 
-    jmp SHELL_mainloop      ; ループ継続
+    jmp SHELL_mainLoop      ; ループ継続
 
 SHELL_execute:
     mov byte [BUF_input + bx], 0  ; 文字列終端を追加
@@ -168,7 +168,7 @@ IO_printLnStr:          ; 改行を出力
 
 IO_backspace:
     cmp bx, 0
-    jz SHELL_mainloop   ; 何も入力されていなければスキップ
+    jz SHELL_mainLoop   ; 何も入力されていなければスキップ
     dec bx
     mov ah, 0x0E
     mov al, 0x08
@@ -177,7 +177,7 @@ IO_backspace:
     int 0x10            ; 空白を上書き
     mov al, 0x08
     int 0x10            ; カーソルを再び戻す
-    jmp SHELL_mainloop
+    jmp SHELL_mainLoop
 
 
 ; === データ ===
