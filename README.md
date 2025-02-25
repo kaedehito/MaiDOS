@@ -1,6 +1,7 @@
 # Simplified OS
 
-![image](https://github.com/user-attachments/assets/92dcc770-3370-492f-af87-ab968af91fec)
+![image](https://github.com/user-attachments/assets/564a89bb-1990-46ed-b871-435faf363412)
+
 
 
 ## 起動方法
