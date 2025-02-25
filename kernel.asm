@@ -159,23 +159,23 @@ IO_printStr:
 IO_printStr__done:
     ret
 
-IO_printLnStr:
+IO_printLnStr:          ; 改行を出力
     call IO_printStr
-    mov si, VAL_newline ; 改行を出力
+    mov si, VAL_newline
     call IO_printStr
     ret
 
 IO_backspace:
     cmp bx, 0
-    jz SHELL_mainloop    ; 何も入力されていなければスキップ
+    jz SHELL_mainloop   ; 何も入力されていなければスキップ
     dec bx
     mov ah, 0x0E
     mov al, 0x08
-    int 0x10        ; カーソルを戻す
+    int 0x10            ; カーソルを戻す
     mov al, ' '
-    int 0x10        ; 空白を上書き
+    int 0x10            ; 空白を上書き
     mov al, 0x08
-    int 0x10        ; カーソルを再び戻す
+    int 0x10            ; カーソルを再び戻す
     jmp SHELL_mainloop
 
 
