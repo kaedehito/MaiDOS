@@ -16,7 +16,7 @@ SHELL_start:
     mov si, VAL_shPrompt    ; プロンプト文字列を表示
     call IO_printStr
 
-    mov bx, 0       ; 入力バッファのインデックスを初期化
+    mov bx, 0   ; 入力バッファのインデックスを初期化
 
 SHELL_mainLoop:
     call IO_getKey      ; ユーザー入力取得
@@ -27,10 +27,10 @@ SHELL_mainLoop:
     cmp al, ' '                 ; Enterキーかチェック (0x0D = CR)
     je SHELL_mainLoop__space    ; 押されたらコマンド実行
 
-    cmp al, 0x08    ; Backspaceキーかチェック (0x08 = BS)
+    cmp al, 0x08        ; Backspaceキーかチェック (0x08 = BS)
     je IO_backspace
 
-    cmp bx, 19      ; バッファが一杯なら入力を制限
+    cmp bx, 19          ; バッファが一杯なら入力を制限
     jae SHELL_mainLoop
 
     call IO_printChar           ; 入力文字を画面に表示
