@@ -1,7 +1,6 @@
-# Simplified OS
+# MaiDOS
 
 ![image](https://github.com/user-attachments/assets/92dcc770-3370-492f-af87-ab968af91fec)
-
 
 ## 起動方法
 
