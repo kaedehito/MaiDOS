@@ -1,3 +1,5 @@
+; === Simplified OS ===
+
 welcome:
     call APP_clear          ; BIOSの画面をクリア
 
@@ -6,6 +8,7 @@ welcome:
 
     mov si, VAL_newline     ; 改行
     call IO_printStr
+
 
 ; === シェル ===
 
@@ -73,6 +76,7 @@ SHELL_matchCmd:
     je APP_exit
 
     ret
+
 
 ; === アプリ ===
 
@@ -167,6 +171,7 @@ IO_backspace:
     mov al, 0x08
     int 0x10        ; カーソルを再び戻す
     jmp SHELL_mainloop
+
 
 ; === データ ===
 
