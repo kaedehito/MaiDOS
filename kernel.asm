@@ -19,10 +19,13 @@ SHELL_start:
     mov bx, 0       ; 入力バッファのインデックスを初期化
 
 SHELL_mainLoop:
-    call IO_getKey  ; ユーザー入力取得
+    call IO_getKey      ; ユーザー入力取得
 
-    cmp al, 0x0D    ; Enterキーかチェック (0x0D = CR)
-    je SHELL_execute; 押されたらコマンド実行
+    cmp al, 0x0D        ; Enterキーかチェック (0x0D = CR)
+    je SHELL_execute    ; 押されたらコマンド実行
+
+    cmp al, ' '                 ; Enterキーかチェック (0x0D = CR)
+    je SHELL_mainLoop__space    ; 押されたらコマンド実行
 
     cmp al, 0x08    ; Backspaceキーかチェック (0x08 = BS)
     je IO_backspace
@@ -30,19 +33,26 @@ SHELL_mainLoop:
     cmp bx, 19      ; バッファが一杯なら入力を制限
     jae SHELL_mainLoop
 
-    call IO_printChar       ; 入力文字を画面に表示
-    mov [BUF_input + bx], al  ; 入力をバッファに保存
-    inc bx                  ; バッファを指すbxを進める
+    call IO_printChar           ; 入力文字を画面に表示
+    mov [BUF_input + bx], al    ; 入力をバッファに追加
+    inc bx                      ; バッファを指すbxを進める
 
-    jmp SHELL_mainLoop      ; ループ継続
+    jmp SHELL_mainLoop          ; ループ継続
+
+SHELL_mainLoop__space:
+    call IO_printChar               ; 入力文字を画面に表示
+    mov byte [BUF_input + bx], 0    ; Null文字をバッファに追加
+    inc bx                          ; バッファを指すbxを進める
+
+    jmp SHELL_mainLoop          ; ループ継続
 
 SHELL_execute:
-    mov byte [BUF_input + bx], 0  ; 文字列終端を追加
+    mov byte [BUF_input + bx], 0    ; 文字列終端を追加
 
     mov si, VAL_newLine     ; 改行
     call IO_printStr
 
-    mov si, BUF_input         ; コマンドを実行
+    mov si, BUF_input       ; コマンドを実行
     call SHELL_matchCmd
 
     mov si, VAL_newLine     ; 改行
@@ -101,7 +111,7 @@ APP_clear:
     jmp SHELL_matchCmd__success
 
 APP_dup:    ; ２倍する
-    mov ax, [BUF_input + bx + 1]
+    mov ax, [BUF_input + 4]
     sub ax, '0'     ; 数値に変換
     add ax, ax
     add ax, '0'     ; 文字に戻す
@@ -125,8 +135,6 @@ STR_compare__loop:
 
     test al, al
     jz STR_compare__match       ; 両方の文字列が Null文字に到達したら一致
-    cmp al, ' '
-    je STR_compare__match       ; スペースでも終了
 
     inc si
     inc di
