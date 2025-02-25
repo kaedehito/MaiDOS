@@ -198,7 +198,7 @@ VAL_msgWelcome db 'Welcome back to computer, master!', 0
 VAL_msgError db 'Error! unknown command: ', 0
 VAL_msgHelp db 'Simplified OS v0.1.0', 0x0D, 0x0A, \
     '(c) 2025 Kajizuka Taichi', 0x0D, 0x0A, \
-    'Commands: help, dup, clear, exit', 0
+    'Commands: help, echo, clear, exit', 0
 
 ; コマンド入力受け付け用バッファ領域
 BUF_input times 20 db 0
