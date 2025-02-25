@@ -30,7 +30,7 @@ SHELL_mainLoop:
     cmp al, 0x08        ; Backspaceキーかチェック (0x08 = BS)
     je IO_backspace
 
-    cmp bx, 19          ; バッファが一杯なら入力を制限
+    cmp bx, 49          ; バッファが一杯なら入力を制限
     jae SHELL_mainLoop
 
     call IO_printChar           ; 入力文字を画面に表示
@@ -201,7 +201,7 @@ VAL_msgHelp db 'Simplified OS v0.1.0', 0x0D, 0x0A, \
     'Commands: help, echo, clear, exit', 0
 
 ; コマンド入力受け付け用バッファ領域
-BUF_input times 20 db 0
+BUF_input times 50 db 0
 
 ; 残りのバイト列を埋める
 times 510-($-$$) db 0
