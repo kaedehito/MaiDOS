@@ -16,6 +16,7 @@ SHELL_start:
     call IO_printStr
 
     mov bx, 0   ; 入力バッファのインデックスを初期化
+    xor dh, dh  ; Space入力フラグを初期化
 
 SHELL_mainLoop:
     call IO_getKey      ; ユーザー入力取得
@@ -40,11 +41,19 @@ SHELL_mainLoop:
 
 SHELL_mainLoop__space:
     call IO_printChar               ; 入力文字を画面に表示
+
+    cmp dh, 0                       ; Spaceがすでに入力されたかどうか
+    jne SHELL_mainLoop__spaceSecond
+
     mov byte [BUF_input + bx], 0    ; Null文字をバッファに追加
     inc bx                          ; バッファを指すbxを進める
-
+    inc dh                          ; Space入力フラグを立てる
     jmp SHELL_mainLoop              ; ループ継続
 
+SHELL_mainLoop__spaceSecond:
+    mov byte [BUF_input + bx], ' '  ; Null文字をバッファに追加
+    inc bx                          ; バッファを指すbxを進める
+    jmp SHELL_mainLoop              ; ループ継続
 
 SHELL_execute:
     ; === シェルコマンドを実行 ===
