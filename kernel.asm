@@ -91,9 +91,9 @@ APP_clear:
 
 APP_dup:    ; ２倍する
     mov ax, [BUF_cmd + bx + 1]
-    sub ax, '0'
+    sub ax, '0'     ; 数値に変換
     add ax, ax
-    add ax, '0'
+    add ax, '0'     ; 文字に戻す
     call IO_printChar
     ret
 
